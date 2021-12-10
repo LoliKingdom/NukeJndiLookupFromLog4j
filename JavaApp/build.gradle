@@ -1,0 +1,16 @@
+plugins {
+    id 'java'
+}
+
+group 'zone.rong'
+version '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'zone.rong.nukejndilookupfromlog4j.Main'
+    }
+}
