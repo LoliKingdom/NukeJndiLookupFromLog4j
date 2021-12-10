@@ -101,7 +101,6 @@ public class NukeJndiLookupFromLog4j implements IFMLLoadingPlugin {
     }
 
     public static class Container extends DummyModContainer {
-
         public Container() {
             super(new ModMetadata());
             ModMetadata meta = this.getMetadata();
@@ -118,7 +117,5 @@ public class NukeJndiLookupFromLog4j implements IFMLLoadingPlugin {
             bus.register(this);
             return true;
         }
-
     }
-
 }
