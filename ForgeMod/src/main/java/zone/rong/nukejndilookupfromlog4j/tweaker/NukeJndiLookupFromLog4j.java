@@ -67,7 +67,7 @@ public class NukeJndiLookupFromLog4j implements ITweaker {
         // Capture any LoggerContexts created afterwards via proxying
         Field factoryField = LogManager.class.getDeclaredField("factory");
         factoryField.setAccessible(true);
-        factoryField.set(null, Proxy.newProxyInstance(LogManager.class.getClassLoader(), new Class[] { LoggerContextFactory.class, ShutdownCallbackRegistry.class }, (proxy, method, args) -> {
+        factoryField.set(null, Proxy.newProxyInstance(LogManager.class.getClassLoader(), factory.getClass().getInterfaces(), (proxy, method, args) -> {
             Object result = method.invoke(factory, args);
             if (result instanceof LoggerContext) {
                 nukeJndiLookup((LoggerContext) result);
@@ -84,6 +84,8 @@ public class NukeJndiLookupFromLog4j implements ITweaker {
     public void injectIntoClassLoader(LaunchClassLoader classLoader) {
         if (classExists(classLoader, "net.minecraftforge.fml.relauncher.CoreModManager")) {
             callSupport(classLoader, "Support1122");
+        } else if (classExists(classLoader, "cpw.mods.fml.relauncher.CoreModManager")) {
+            callSupport(classLoader, "Support1710");
         } else {
             throw new IllegalStateException("this version of minecraft is not supported!");
         }

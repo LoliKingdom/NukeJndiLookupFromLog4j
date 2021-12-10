@@ -17,6 +17,7 @@ repositories {
 
 sourceSets {
     forge1122
+    forge1710
 }
 
 dependencies {
@@ -31,10 +32,16 @@ dependencies {
     forge1122Implementation "net.minecraftforge:forge:1.12.2-14.23.5.2856:universal"
     //noinspection GradlePackageUpdate // suppress IDEA
     forge1122Implementation "com.google.guava:guava:21.0"
+
+    // the dependency for forge 1.7.10 part
+    forge1710Implementation "net.minecraftforge:forge:1.7.10-10.13.4.1614-1.7.10:universal"
+    //noinspection GradlePackageUpdate // suppress IDEA
+    forge1710Implementation "com.google.guava:guava:17.0"
 }
 
 jar {
     from sourceSets.forge1122.output
+    from sourceSets.forge1710.output
 
     manifest {
         attributes([
