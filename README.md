@@ -5,4 +5,4 @@ This is needed because of a major vulnerability introduced by the class' functio
 
 - [Java Application](https://github.com/LoliKingdom/NukeJndiLookupFromLog4j/releases/tag/java_app): resides in this repository (see releases), that removes JndiLookup.class from any log4j builds you feed via a GUI. Hard removal of the class on the server-side forcibly closing the vulnerability.
 
-- [LoliASM](https://github.com/LoliKingdom/LoliASM): A Minecraft mod that does numerous major Minecraft optimizations and bugfixes. As of 5.0, it will have a softer fix available.
+- [Forge Mod](https://github.com/LoliKingdom/NukeJndiLookupFromLog4j/tree/master/ForgeMod) [(CurseForge Link)](https://www.curseforge.com/minecraft/mc-mods/nukejndilookupfromlog4j): A Minecraft mod developed for MinecraftForge for Minecraft versions 1.12.2 and lower, a softer, but hacky fix than the aforementioned method.
