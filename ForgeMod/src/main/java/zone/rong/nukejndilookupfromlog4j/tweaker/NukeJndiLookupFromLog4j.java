@@ -1,10 +1,8 @@
-package zone.rong.nukejndilookupfromlog4j;
+package zone.rong.nukejndilookupfromlog4j.tweaker;
 
-import com.google.common.eventbus.EventBus;
-import net.minecraftforge.fml.common.DummyModContainer;
-import net.minecraftforge.fml.common.LoadController;
-import net.minecraftforge.fml.common.ModMetadata;
-import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
+import net.minecraft.launchwrapper.ITweaker;
+import net.minecraft.launchwrapper.Launch;
+import net.minecraft.launchwrapper.LaunchClassLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.impl.Log4jContextFactory;
@@ -13,17 +11,19 @@ import org.apache.logging.log4j.core.lookup.StrLookup;
 import org.apache.logging.log4j.core.util.ShutdownCallbackRegistry;
 import org.apache.logging.log4j.spi.LoggerContextFactory;
 
-import javax.annotation.Nullable;
+import java.io.File;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Map;
 
-public class NukeJndiLookupFromLog4j implements IFMLLoadingPlugin {
-
+@SuppressWarnings("unused") // used by reflection
+public class NukeJndiLookupFromLog4j implements ITweaker {
     private static final MethodHandle lookupsGetter;
 
     static {
@@ -67,7 +67,7 @@ public class NukeJndiLookupFromLog4j implements IFMLLoadingPlugin {
         // Capture any LoggerContexts created afterwards via proxying
         Field factoryField = LogManager.class.getDeclaredField("factory");
         factoryField.setAccessible(true);
-        factoryField.set(null, Proxy.newProxyInstance(LogManager.class.getClassLoader(), new Class[] { LoggerContextFactory.class, ShutdownCallbackRegistry.class }, (proxy, method, args) -> {
+        factoryField.set(null, Proxy.newProxyInstance(LogManager.class.getClassLoader(), factory.getClass().getInterfaces(), (proxy, method, args) -> {
             Object result = method.invoke(factory, args);
             if (result instanceof LoggerContext) {
                 nukeJndiLookup((LoggerContext) result);
@@ -77,48 +77,45 @@ public class NukeJndiLookupFromLog4j implements IFMLLoadingPlugin {
     }
 
     @Override
-    public String[] getASMTransformerClass() {
+    public void acceptOptions(List<String> args, File gameDir, File assetsDir, String profile) {
+    }
+
+    @Override
+    public void injectIntoClassLoader(LaunchClassLoader classLoader) {
+        if (classExists(classLoader, "net.minecraftforge.fml.relauncher.CoreModManager")) {
+            callSupport(classLoader, "Support1122");
+        } else if (classExists(classLoader, "cpw.mods.fml.relauncher.CoreModManager")) {
+            callSupport(classLoader, "Support1710");
+        } else {
+            throw new IllegalStateException("this version of minecraft is not supported!");
+        }
+    }
+
+    private boolean classExists(LaunchClassLoader classLoader, String name) {
+        try {
+            classLoader.findClass(name);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
+    private void callSupport(LaunchClassLoader classLoader, String name) {
+        try {
+            Class<?> supportClass = classLoader.findClass("zone.rong.nukejndilookupfromlog4j.supports." + name);
+            supportClass.getMethod("runSupport").invoke(null);
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    @Override
+    public String getLaunchTarget() {
+        return null;
+    }
+
+    @Override
+    public String[] getLaunchArguments() {
         return new String[0];
     }
-
-    @Override
-    public String getModContainerClass() {
-        return "zone.rong.nukejndilookupfromlog4j.NukeJndiLookupFromLog4j$Container";
-    }
-
-    @Nullable
-    @Override
-    public String getSetupClass() {
-        return null;
-    }
-
-    @Override
-    public void injectData(Map<String, Object> data) {}
-
-    @Override
-    public String getAccessTransformerClass() {
-        return null;
-    }
-
-    public static class Container extends DummyModContainer {
-
-        public Container() {
-            super(new ModMetadata());
-            ModMetadata meta = this.getMetadata();
-            meta.modId = "nukejndilookupfromlog4j";
-            meta.name = "NukeJndiLookupFromLog4j";
-            meta.description = "Prevents a major vulnerability introduced by log4j from being abused.";
-            meta.version = "1.0.0";
-            meta.authorList.add("Rongmario");
-            meta.credits = "https://github.com/apache/logging-log4j2/pull/608";
-        }
-
-        @Override
-        public boolean registerBus(EventBus bus, LoadController controller) {
-            bus.register(this);
-            return true;
-        }
-
-    }
-
 }
