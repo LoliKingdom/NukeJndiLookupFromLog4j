@@ -12,25 +12,33 @@ sourceCompatibility = targetCompatibility = '1.8'
 
 repositories {
     maven { url = "https://files.minecraftforge.net/maven" }
+    maven { url = "https://libraries.minecraft.net/" }
+}
+
+sourceSets {
+    forge1122
 }
 
 dependencies {
+    // common dependencies
     //noinspection GradlePackageUpdate // suppress IDEA
     implementation "org.apache.logging.log4j:log4j-api:2.8.1"
     //noinspection GradlePackageUpdate // suppress IDEA
     implementation "org.apache.logging.log4j:log4j-core:2.8.1"
+    implementation "net.minecraft:launchwrapper:1.12"
+
+    // the dependency for forge 1.12.2 part
+    forge1122Implementation "net.minecraftforge:forge:1.12.2-14.23.5.2856:universal"
     //noinspection GradlePackageUpdate // suppress IDEA
-    implementation "com.google.code.findbugs:jsr305:3.0.1"
-    implementation "net.minecraftforge:forge:1.12.2-14.23.5.2856:universal"
-    implementation "com.google.guava:guava:21.0"
+    forge1122Implementation "com.google.guava:guava:21.0"
 }
 
 jar {
+    from sourceSets.forge1122.output
+
     manifest {
         attributes([
-                "FMLCorePluginContainsFMLMod": true,
-                "FMLCorePlugin": 'zone.rong.nukejndilookupfromlog4j.NukeJndiLookupFromLog4j',
-                "ForceLoadAsMod": true
+                "TweakClass": 'zone.rong.nukejndilookupfromlog4j.tweaker.NukeJndiLookupFromLog4j',
         ])
     }
 }
