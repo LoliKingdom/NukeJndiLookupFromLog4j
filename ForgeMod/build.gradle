@@ -18,6 +18,8 @@ repositories {
 sourceSets {
     forge1122
     forge1710
+    launchWrapper
+    modLauncher
 }
 
 dependencies {
@@ -26,7 +28,17 @@ dependencies {
     implementation "org.apache.logging.log4j:log4j-api:2.8.1"
     //noinspection GradlePackageUpdate // suppress IDEA
     implementation "org.apache.logging.log4j:log4j-core:2.8.1"
-    implementation "net.minecraft:launchwrapper:1.12"
+
+    // launch wrapper dependencies
+    launchWrapperImplementation "net.minecraft:launchwrapper:1.12"
+    launchWrapperImplementation sourceSets.main.output
+
+    // launch wrapper dependencies
+    modLauncherImplementation "cpw.mods:modlauncher:2.1.5"
+    modLauncherImplementation "net.minecraftforge:forge:1.13.2-25.0.222:universal"
+    modLauncherImplementation sourceSets.main.output
+    modLauncherCompileOnly "com.google.auto.service:auto-service-annotations:1.0.1"
+    modLauncherAnnotationProcessor "com.google.auto.service:auto-service:1.0.1"
 
     // the dependency for forge 1.12.2 part
     forge1122Implementation "net.minecraftforge:forge:1.12.2-14.23.5.2856:universal"
@@ -42,10 +54,12 @@ dependencies {
 jar {
     from sourceSets.forge1122.output
     from sourceSets.forge1710.output
+    from sourceSets.launchWrapper.output
+    from sourceSets.modLauncher.output
 
     manifest {
         attributes([
-                "TweakClass": 'zone.rong.nukejndilookupfromlog4j.tweaker.NukeJndiLookupFromLog4j',
+                "TweakClass": 'zone.rong.nukejndilookupfromlog4j.tweaker.NukeJndiLookupFromLog4jTweaker',
         ])
     }
 }

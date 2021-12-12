@@ -21,6 +21,7 @@ public class Support1122 {
             meta.description = "Prevents a major vulnerability introduced by log4j from being abused.";
             meta.version = "1.0.0";
             meta.authorList.add("Rongmario");
+            meta.authorList.add("anatawa12");
             meta.credits = "https://github.com/apache/logging-log4j2/pull/608";
         }
 

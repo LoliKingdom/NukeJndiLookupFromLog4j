@@ -1,29 +1,21 @@
-package zone.rong.nukejndilookupfromlog4j.tweaker;
+package zone.rong.nukejndilookupfromlog4j;
 
-import net.minecraft.launchwrapper.ITweaker;
-import net.minecraft.launchwrapper.Launch;
-import net.minecraft.launchwrapper.LaunchClassLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.impl.Log4jContextFactory;
 import org.apache.logging.log4j.core.lookup.Interpolator;
 import org.apache.logging.log4j.core.lookup.StrLookup;
-import org.apache.logging.log4j.core.util.ShutdownCallbackRegistry;
 import org.apache.logging.log4j.spi.LoggerContextFactory;
 
-import java.io.File;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
-import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings("unused") // used by reflection
-public class NukeJndiLookupFromLog4j implements ITweaker {
+public class NukeJndiLookupFromLog4j {
     private static final MethodHandle lookupsGetter;
 
     static {
@@ -60,7 +52,7 @@ public class NukeJndiLookupFromLog4j implements ITweaker {
         } catch (Throwable ignored) { }
     }
 
-    public NukeJndiLookupFromLog4j() throws ReflectiveOperationException {
+    public static void init() throws ReflectiveOperationException {
         // Deal with initial LoggerContexts
         final LoggerContextFactory factory = LogManager.getFactory();
         ((Log4jContextFactory) factory).getSelector().getLoggerContexts().forEach(NukeJndiLookupFromLog4j::nukeJndiLookup);
@@ -74,48 +66,5 @@ public class NukeJndiLookupFromLog4j implements ITweaker {
             }
             return result;
         }));
-    }
-
-    @Override
-    public void acceptOptions(List<String> args, File gameDir, File assetsDir, String profile) {
-    }
-
-    @Override
-    public void injectIntoClassLoader(LaunchClassLoader classLoader) {
-        if (classExists(classLoader, "net.minecraftforge.fml.relauncher.CoreModManager")) {
-            callSupport(classLoader, "Support1122");
-        } else if (classExists(classLoader, "cpw.mods.fml.relauncher.CoreModManager")) {
-            callSupport(classLoader, "Support1710");
-        } else {
-            throw new IllegalStateException("this version of minecraft is not supported!");
-        }
-    }
-
-    private boolean classExists(LaunchClassLoader classLoader, String name) {
-        try {
-            classLoader.findClass(name);
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
-    }
-
-    private void callSupport(LaunchClassLoader classLoader, String name) {
-        try {
-            Class<?> supportClass = classLoader.findClass("zone.rong.nukejndilookupfromlog4j.supports." + name);
-            supportClass.getMethod("runSupport").invoke(null);
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
-    public String getLaunchTarget() {
-        return null;
-    }
-
-    @Override
-    public String[] getLaunchArguments() {
-        return new String[0];
     }
 }
